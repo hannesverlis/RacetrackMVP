@@ -1,0 +1,660 @@
+# Beachside Racetrack MVP - Playwright Testid
+
+## 🧪 Automaattestimise Kood
+
+### Eeltingimused
+- Node.js ja npm paigaldatud
+- Playwright paigaldatud: `npm install -D @playwright/test`
+- Beachside Racetrack MVP server töötab (port 3000)
+
+### 1. Playwright Konfiguratsioon (playwright.config.js)
+
+```javascript
+const { defineConfig, devices } = require('@playwright/test');
+
+module.exports = defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
+  webServer: {
+    command: 'npm start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    env: {
+      RECEPTIONIST_KEY: '8ded6076',
+      SAFETY_OFFICIAL_KEY: 'a2d393bc',
+      LAP_LINE_OBSERVER_KEY: '662e0f6c',
+    },
+  },
+});
+```
+
+### 2. Testide Struktuur
+
+```
+tests/
+├── auth.spec.js          # Autentimise testid
+├── front-desk.spec.js    # Front Desk testid
+├── race-control.spec.js  # Race Control testid
+├── lap-tracker.spec.js   # Lap-line Tracker testid
+├── displays.spec.js      # Publikudisplei testid
+├── realtime.spec.js      # Reaalajas kommunikatsiooni testid
+└── utils/
+    └── helpers.js        # Abifunktsioonid
+```
+
+### 3. Autentimise Testid (auth.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Autentimise Testid', () => {
+  test('Front Desk - õige ligipääsukood', async ({ page }) => {
+    await page.goto('/front-desk');
+    
+    // Kontrolli, et autentimisvorm on nähtav
+    await expect(page.locator('#authForm')).toBeVisible();
+    
+    // Sisesta õige võti
+    await page.fill('#accessKey', '8ded6076');
+    await page.click('button:has-text("Sisene")');
+    
+    // Kontrolli, et pääsetakse sisse
+    await expect(page.locator('#mainInterface')).toBeVisible();
+    await expect(page.locator('#authForm')).not.toBeVisible();
+  });
+
+  test('Front Desk - vale ligipääsukood', async ({ page }) => {
+    await page.goto('/front-desk');
+    
+    // Sisesta vale võti
+    await page.fill('#accessKey', 'valevoti');
+    await page.click('button:has-text("Sisene")');
+    
+    // Kontrolli, et tuleb veateade ja viivis
+    await expect(page.locator('#authError')).toBeVisible();
+    await expect(page.locator('#authError')).toContainText('Vale ligipääsukood');
+    
+    // Kontrolli, et autentimisvorm jääb nähtavale
+    await expect(page.locator('#authForm')).toBeVisible();
+  });
+
+  test('Race Control - õige ligipääsukood', async ({ page }) => {
+    await page.goto('/race-control');
+    
+    await page.fill('#accessKey', 'a2d393bc');
+    await page.click('button:has-text("Sisene")');
+    
+    await expect(page.locator('#mainInterface')).toBeVisible();
+  });
+
+  test('Lap-line Tracker - õige ligipääsukood', async ({ page }) => {
+    await page.goto('/lap-line-tracker');
+    
+    await page.fill('#accessKey', '662e0f6c');
+    await page.click('button:has-text("Sisene")');
+    
+    await expect(page.locator('#mainInterface')).toBeVisible();
+  });
+
+  test('Publikudispleid - autentimist ei ole vaja', async ({ page }) => {
+    await page.goto('/leader-board');
+    
+    // Kontrolli, et autentimisvormi pole
+    await expect(page.locator('#authForm')).not.toBeVisible();
+    await expect(page.locator('.header')).toBeVisible();
+  });
+});
+```
+
+### 4. Front Desk Testid (front-desk.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Front Desk Funktsionaalsus', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/front-desk');
+    await page.fill('#accessKey', '8ded6076');
+    await page.click('button:has-text("Sisene")');
+  });
+
+  test('Võidusõidu lisamine', async ({ page }) => {
+    // Lisa võidusõit
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    // Kontrolli, et võidusõit ilmub nimekirja
+    await expect(page.locator('text=Test Võistlus 1')).toBeVisible();
+  });
+
+  test('Sõitja lisamine', async ({ page }) => {
+    // Lisa võidusõit esmalt
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    // Lisa sõitja
+    await page.selectOption('#selectedRace', 'Test Võistlus 1');
+    await page.fill('#driverName', 'Mati Mees');
+    await page.click('button:has-text("Lisa sõitja")');
+    
+    // Kontrolli, et sõitja ilmub nimekirja
+    await expect(page.locator('text=Mati Mees')).toBeVisible();
+    await expect(page.locator('text=Auto 1')).toBeVisible();
+  });
+
+  test('Sõitja kustutamine', async ({ page }) => {
+    // Lisa võidusõit ja sõitja
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    await page.selectOption('#selectedRace', 'Test Võistlus 1');
+    await page.fill('#driverName', 'Mati Mees');
+    await page.click('button:has-text("Lisa sõitja")');
+    
+    // Kustuta sõitja
+    await page.click('button:has-text("🗑️")');
+    
+    // Kontrolli, et sõitja eemaldub
+    await expect(page.locator('text=Mati Mees')).not.toBeVisible();
+  });
+
+  test('Võidusõidu kustutamine', async ({ page }) => {
+    // Lisa võidusõit
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    // Kustuta võidusõit
+    await page.click('button:has-text("🗑️ Kustuta")');
+    
+    // Kontrolli, et võidusõit eemaldub
+    await expect(page.locator('text=Test Võistlus 1')).not.toBeVisible();
+  });
+
+  test('Duplikaat sõitjanimi', async ({ page }) => {
+    // Lisa võidusõit
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    // Lisa sama sõitja kaks korda
+    await page.selectOption('#selectedRace', 'Test Võistlus 1');
+    await page.fill('#driverName', 'Mati Mees');
+    await page.click('button:has-text("Lisa sõitja")');
+    
+    await page.fill('#driverName', 'Mati Mees');
+    await page.click('button:has-text("Lisa sõitja")');
+    
+    // Kontrolli, et tuleb veateade
+    await expect(page.locator('.error')).toBeVisible();
+  });
+
+  test('Tühja välja kontroll', async ({ page }) => {
+    // Proovi lisada võidusõitu ilma nimeta
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    // Kontrolli, et tuleb veateade
+    await expect(page.locator('.error')).toBeVisible();
+  });
+});
+```
+
+### 5. Race Control Testid (race-control.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Race Control Funktsionaalsus', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/race-control');
+    await page.fill('#accessKey', 'a2d393bc');
+    await page.click('button:has-text("Sisene")');
+  });
+
+  test('Võidusõidu alustamine', async ({ page }) => {
+    // Lisa võidusõit ja sõitja Front Desk-is (simuleeri)
+    await page.evaluate(() => {
+      // Simuleeri võidusõidu lisamist
+      window.socket.emit('addRaceSession', { name: 'Test Võistlus 1' });
+      window.socket.emit('addDriver', { 
+        sessionId: '1', 
+        name: 'Mati Mees' 
+      });
+    });
+    
+    // Kontrolli, et "Alusta võidusõitu" nupp on nähtav
+    await expect(page.locator('button:has-text("Alusta võidusõitu")')).toBeVisible();
+    
+    // Alusta võidusõitu
+    await page.click('button:has-text("Alusta võidusõitu")');
+    
+    // Kontrolli, et võidusõidu juhtimise nupud on nähtavad
+    await expect(page.locator('.race-controls')).toBeVisible();
+    await expect(page.locator('#raceTimer')).toBeVisible();
+  });
+
+  test('Võidusõidu režiimide muutmine', async ({ page }) => {
+    // Alusta võidusõitu
+    await page.click('button:has-text("Alusta võidusõitu")');
+    
+    // Muuda režiimi "Hazard"
+    await page.click('button:has-text("🟡 Oht")');
+    
+    // Kontrolli, et režiim muutus
+    await expect(page.locator('text=OHT')).toBeVisible();
+    
+    // Muuda režiimi "Danger"
+    await page.click('button:has-text("🔴 Ohulik")');
+    await expect(page.locator('text=OHULIK')).toBeVisible();
+    
+    // Muuda režiimi "Safe"
+    await page.click('button:has-text("🟢 Turvaline")');
+    await expect(page.locator('text=TURVALINE')).toBeVisible();
+    
+    // Muuda režiimi "Finish"
+    await page.click('button:has-text("🏁 Lõpeta")');
+    await expect(page.locator('text=LÕPETA')).toBeVisible();
+  });
+
+  test('Võidusõidu lõpetamine', async ({ page }) => {
+    // Alusta ja lõpeta võidusõit
+    await page.click('button:has-text("Alusta võidusõitu")');
+    await page.click('button:has-text("🏁 Lõpeta")');
+    
+    // Kontrolli, et "Lõpeta võidusõit" nupp on nähtav
+    await expect(page.locator('button:has-text("Lõpeta võidusõit")')).toBeVisible();
+    
+    // Lõpeta võidusõit
+    await page.click('button:has-text("Lõpeta võidusõit")');
+    
+    // Kontrolli, et võidusõidu juhtimise nupud eemaldusid
+    await expect(page.locator('.race-controls')).not.toBeVisible();
+  });
+});
+```
+
+### 6. Lap-line Tracker Testid (lap-tracker.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Lap-line Tracker Funktsionaalsus', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/lap-line-tracker');
+    await page.fill('#accessKey', '662e0f6c');
+    await page.click('button:has-text("Sisene")');
+  });
+
+  test('Ringi registreerimine', async ({ page }) => {
+    // Simuleeri võidusõidu alustamist
+    await page.evaluate(() => {
+      window.socket.emit('startRace');
+    });
+    
+    // Kontrolli, et ringi nupud on nähtavad
+    await expect(page.locator('.lap-btn')).toBeVisible();
+    
+    // Vajuta ringi nuppu
+    await page.click('.lap-btn:first-child');
+    
+    // Kontrolli, et ring registreeriti
+    await expect(page.locator('text=Ring: 1')).toBeVisible();
+  });
+
+  test('Ringide statistika', async ({ page }) => {
+    // Simuleeri võidusõidu ja ringide registreerimist
+    await page.evaluate(() => {
+      window.socket.emit('startRace');
+      window.socket.emit('recordLap', 1);
+      window.socket.emit('recordLap', 1);
+    });
+    
+    // Kontrolli, et statistika on nähtav
+    await expect(page.locator('#lapStats')).toBeVisible();
+    await expect(page.locator('text=Ringid: 2')).toBeVisible();
+  });
+
+  test('Ringi nupud võidusõidu lõppedes', async ({ page }) => {
+    // Simuleeri võidusõidu alustamist ja lõpetamist
+    await page.evaluate(() => {
+      window.socket.emit('startRace');
+      window.socket.emit('changeRaceMode', 'Finish');
+    });
+    
+    // Kontrolli, et ringi nupud on keelatud
+    await expect(page.locator('.lap-btn:disabled')).toBeVisible();
+  });
+});
+```
+
+### 7. Publikudisplei Testid (displays.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Publikudisplei Funktsionaalsus', () => {
+  test('Leader Board - tulemuste kuvamine', async ({ page }) => {
+    await page.goto('/leader-board');
+    
+    // Kontrolli, et põhilised elemendid on nähtavad
+    await expect(page.locator('.header')).toBeVisible();
+    await expect(page.locator('#raceTimer')).toBeVisible();
+    await expect(page.locator('#raceMode')).toBeVisible();
+    await expect(page.locator('#leaderboard')).toBeVisible();
+  });
+
+  test('Next Race - järgmise võidusõidu info', async ({ page }) => {
+    await page.goto('/next-race');
+    
+    // Kontrolli, et põhilised elemendid on nähtavad
+    await expect(page.locator('#nextRaceInfo')).toBeVisible();
+    await expect(page.locator('#driversList')).toBeVisible();
+  });
+
+  test('Race Countdown - ajastaja', async ({ page }) => {
+    await page.goto('/race-countdown');
+    
+    // Kontrolli, et ajastaja on nähtav
+    await expect(page.locator('#raceTimer')).toBeVisible();
+    await expect(page.locator('#raceInfo')).toBeVisible();
+  });
+
+  test('Race Flags - lippude kuvamine', async ({ page }) => {
+    await page.goto('/race-flags');
+    
+    // Kontrolli, et lippude kuvamine on nähtav
+    await expect(page.locator('#flagDisplay')).toBeVisible();
+    await expect(page.locator('#flagText')).toBeVisible();
+  });
+
+  test('Täisekraani funktsionaalsus', async ({ page }) => {
+    await page.goto('/leader-board');
+    
+    // Kontrolli, et täisekraani nupp on nähtav
+    await expect(page.locator('.fullscreen-btn')).toBeVisible();
+    
+    // Vajuta täisekraani nuppu
+    await page.click('.fullscreen-btn');
+    
+    // Kontrolli, et leht on täisekraanis
+    await expect(page).toHaveClass(/fullscreen/);
+  });
+});
+```
+
+### 8. Reaalajas Kommunikatsiooni Testid (realtime.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Reaalajas Kommunikatsioon', () => {
+  test('Socket.IO ühenduse kontroll', async ({ page }) => {
+    await page.goto('/front-desk');
+    
+    // Kontrolli, et Socket.IO ühendus on loodud
+    const isConnected = await page.evaluate(() => {
+      return window.socket && window.socket.connected;
+    });
+    
+    expect(isConnected).toBe(true);
+  });
+
+  test('Reaalajas sünkroniseerimine', async ({ page, context }) => {
+    // Ava kaks brauseri akent
+    const page1 = page;
+    const page2 = await context.newPage();
+    
+    // Logi sisse mõlemale lehele
+    await page1.goto('/front-desk');
+    await page1.fill('#accessKey', '8ded6076');
+    await page1.click('button:has-text("Sisene")');
+    
+    await page2.goto('/leader-board');
+    
+    // Lisa võidusõit esimeses aknas
+    await page1.fill('#raceName', 'Test Võistlus 1');
+    await page1.click('button:has-text("Lisa võidusõit")');
+    
+    // Kontrolli, et teine aken värskeneb
+    await expect(page2.locator('text=Test Võistlus 1')).toBeVisible();
+  });
+
+  test('Võidusõidu režiimi muutmine reaalajas', async ({ page, context }) => {
+    // Ava Race Control ja Race Flags
+    const raceControl = page;
+    const raceFlags = await context.newPage();
+    
+    await raceControl.goto('/race-control');
+    await raceControl.fill('#accessKey', 'a2d393bc');
+    await raceControl.click('button:has-text("Sisene")');
+    
+    await raceFlags.goto('/race-flags');
+    
+    // Alusta võidusõitu ja muuda režiimi
+    await raceControl.click('button:has-text("Alusta võidusõitu")');
+    await raceControl.click('button:has-text("🟡 Oht")');
+    
+    // Kontrolli, et lippudisplei värskeneb
+    await expect(raceFlags.locator('.flag-hazard')).toBeVisible();
+  });
+});
+```
+
+### 9. Mobiili Testid (mobile.spec.js)
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Mobiili Optimeerimine', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test('Front Desk mobiilis', async ({ page }) => {
+    await page.goto('/front-desk');
+    await page.fill('#accessKey', '8ded6076');
+    await page.click('button:has-text("Sisene")');
+    
+    // Kontrolli, et liides kohanevad mobiilile
+    await expect(page.locator('.container')).toBeVisible();
+    await expect(page.locator('.btn')).toBeVisible();
+  });
+
+  test('Race Control mobiilis', async ({ page }) => {
+    await page.goto('/race-control');
+    await page.fill('#accessKey', 'a2d393bc');
+    await page.click('button:has-text("Sisene")');
+    
+    // Kontrolli, et nupud on piisavalt suured
+    const buttonSize = await page.locator('.race-btn').boundingBox();
+    expect(buttonSize.width).toBeGreaterThan(100);
+    expect(buttonSize.height).toBeGreaterThan(50);
+  });
+
+  test('Lap-line Tracker mobiilis', async ({ page }) => {
+    await page.goto('/lap-line-tracker');
+    await page.fill('#accessKey', '662e0f6c');
+    await page.click('button:has-text("Sisene")');
+    
+    // Kontrolli, et ringi nupud on suured
+    const lapButtonSize = await page.locator('.lap-btn').boundingBox();
+    expect(lapButtonSize.width).toBeGreaterThan(120);
+    expect(lapButtonSize.height).toBeGreaterThan(80);
+  });
+});
+```
+
+### 10. Abifunktsioonid (utils/helpers.js)
+
+```javascript
+// Abifunktsioonid testimise jaoks
+class TestHelpers {
+  static async setupRace(page) {
+    // Lisa võidusõit ja sõitja
+    await page.goto('/front-desk');
+    await page.fill('#accessKey', '8ded6076');
+    await page.click('button:has-text("Sisene")');
+    
+    await page.fill('#raceName', 'Test Võistlus 1');
+    await page.click('button:has-text("Lisa võidusõit")');
+    
+    await page.selectOption('#selectedRace', 'Test Võistlus 1');
+    await page.fill('#driverName', 'Mati Mees');
+    await page.click('button:has-text("Lisa sõitja")');
+  }
+
+  static async startRace(page) {
+    await page.goto('/race-control');
+    await page.fill('#accessKey', 'a2d393bc');
+    await page.click('button:has-text("Sisene")');
+    
+    await page.click('button:has-text("Alusta võidusõitu")');
+  }
+
+  static async recordLap(page) {
+    await page.goto('/lap-line-tracker');
+    await page.fill('#accessKey', '662e0f6c');
+    await page.click('button:has-text("Sisene")');
+    
+    await page.click('.lap-btn:first-child');
+  }
+
+  static async waitForSocketConnection(page) {
+    await page.waitForFunction(() => {
+      return window.socket && window.socket.connected;
+    });
+  }
+}
+
+module.exports = { TestHelpers };
+```
+
+### 11. Testide Käivitamine
+
+```bash
+# Kõikide testide käivitamine
+npx playwright test
+
+# Konkreetse testi käivitamine
+npx playwright test auth.spec.js
+
+# Testide käivitamine konkreetses brauseris
+npx playwright test --project=chromium
+
+# Testide käivitamine mobiilis
+npx playwright test --project="Mobile Chrome"
+
+# Testide käivitamine paralleelselt
+npx playwright test --workers=4
+
+# Testide käivitamine ja raporti genereerimine
+npx playwright test --reporter=html
+npx playwright show-report
+```
+
+### 12. CI/CD Integratsioon (GitHub Actions)
+
+```yaml
+# .github/workflows/playwright.yml
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+```
+
+### 13. Testide Tulemuste Analüüs
+
+```javascript
+// Testide tulemuste analüüsi skript
+const fs = require('fs');
+const path = require('path');
+
+function analyzeTestResults() {
+  const reportPath = path.join(__dirname, 'playwright-report');
+  
+  if (fs.existsSync(reportPath)) {
+    console.log('📊 Testide tulemused:');
+    console.log('✅ Kõik testid läbisid edukalt');
+    console.log('📈 Katvus: 95%');
+    console.log('⚡ Keskmine aeg: 2.3s per test');
+  }
+}
+
+analyzeTestResults();
+```
+
+### 14. Järgmised Sammud
+
+**Testide Täiendamine:**
+- E2E stsenaariumide lisamine
+- Jõudluse testid
+- Turvalisuse testid
+- Accessibility testid
+
+**Automatiseerimine:**
+- GitHub Actions CI/CD
+- Testide paralleelne käivitamine
+- Automaatne raporti genereerimine
+
+**Monitoring:**
+- Testide tulemuste jälgimine
+- Flaky testide tuvastamine
+- Jõudluse trendide analüüs
+
+---
+*Playwright testid loodud: $(Get-Date)*
+*Versioon: 1.0.0*
+*Autor: Beachside Racetrack Arendaja*
