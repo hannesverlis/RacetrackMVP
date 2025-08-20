@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Control - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏁 Race Control</h1>
+            <p>Võidusõidu juhtimine ja turvalisuse tagamine</p>
+        </div>
+
+        <!-- Autentimise vorm -->
+        <div id="authForm" class="auth-form">
+            <h2>🔐 Ligipääs</h2>
+            <div class="form-group">
+                <label for="accessKey">Ligipääsukood:</label>
+                <input type="password" id="accessKey" class="form-control" placeholder="Sisesta ligipääsukood">
+            </div>
+            <button onclick="authenticate()" class="btn btn-secondary">Sisene</button>
+            <div id="authError" class="error" style="display: none;"></div>
+        </div>
+
+        <!-- Põhiline kasutajaliides -->
+        <div id="mainInterface" style="display: none;">
+            <!-- Järgmine võidusõit -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">⏭️ Järgmine võidusõit</h3>
+                </div>
+                <div id="nextRaceInfo">
+                    <p>Järgmist võidusõitu pole planeeritud.</p>
+                </div>
+                <button id="startRaceBtn" onclick="startRace()" class="btn btn-success" style="display: none;">
+                    🏁 Alusta võidusõitu
+                </button>
+            </div>
+
+            <!-- Võidusõidu juhtimine -->
+            <div id="raceControls" class="card" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">🎮 Võidusõidu juhtimine</h3>
+                </div>
+                <div class="timer" id="raceTimer">10:00</div>
+                <div class="race-controls">
+                    <button onclick="changeRaceMode('Safe')" class="btn btn-success race-btn">
+                        🟢 Turvaline
+                    </button>
+                    <button onclick="changeRaceMode('Hazard')" class="btn btn-warning race-btn">
+                        🟡 Oht
+                    </button>
+                    <button onclick="changeRaceMode('Danger')" class="btn btn-danger race-btn">
+                        🔴 Ohtlik
+                    </button>
+                    <button onclick="changeRaceMode('Finish')" class="btn race-btn" style="background: repeating-conic-gradient(#000 0deg 45deg, #fff 45deg 90deg); color: #000;">
+                        🏁 Lõpeta
+                    </button>
+                </div>
+                <button id="endSessionBtn" onclick="endRaceSession()" class="btn btn-danger" style="display: none; margin-top: 20px;">
+                    🏁 Lõpeta võidusõit
+                </button>
+            </div>
+
+            <!-- Praegune võidusõit -->
+            <div id="currentRaceInfo" class="card" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">🏁 Praegune võidusõit</h3>
+                </div>
+                <div id="currentRaceDetails">
+                    <!-- Võidusõidu andmed kuvatakse siin -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/race-control.js"></script>
+</body>
+</html>

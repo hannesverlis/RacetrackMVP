@@ -1,0 +1,17 @@
+{
+  "name": "racetrack-mvp",
+  "version": "1.0.0",
+  "description": "Beachside Racetrack MVP - Real-time race management system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "RACE_DURATION=60000 node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "keywords": ["racetrack", "real-time", "socket.io", "race-management"],
+  "author": "Beachside Racetrack",
+  "license": "MIT"
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Flags - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Täisekraani nupp -->
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+    <!-- Lippude kuvamine -->
+    <div id="flagDisplay" class="flag-display flag-danger">
+        <div id="flagText">OOTAB VÕIDUSÕITU</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/race-flags.js"></script>
+</body>
+</html>

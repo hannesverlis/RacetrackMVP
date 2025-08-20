@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Race - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏭️ Järgmine võidusõit</h1>
+            <p>Järgmise võidusõidu info ja sõitjate nimekiri</p>
+        </div>
+
+        <!-- Täisekraani nupp -->
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+        <!-- Järgmise võidusõidu info -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🏁 Järgmine võidusõit</h3>
+            </div>
+            <div id="nextRaceInfo">
+                <p>Järgmist võidusõitu pole planeeritud.</p>
+            </div>
+        </div>
+
+        <!-- Sõitjate nimekiri -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">👥 Sõitjad</h3>
+            </div>
+            <div id="driversList">
+                <p>Sõitjaid pole veel registreeritud.</p>
+            </div>
+        </div>
+
+        <!-- Teade -->
+        <div id="message" class="card" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title">📢 Teade</h3>
+            </div>
+            <div id="messageContent" style="text-align: center; font-size: 1.5rem; font-weight: bold;">
+                <!-- Teade kuvatakse siin -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/next-race.js"></script>
+</body>
+</html>

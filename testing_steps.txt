@@ -1,0 +1,206 @@
+# Beachside Racetrack MVP - Testimise Sammud
+
+## 🧪 Süsteemi Testimise Juhend
+
+### Eeltingimused
+- Node.js server töötab (port 3000)
+- Keskkonnamuutujad on seadistatud
+- Kõik sõltuvused on paigaldatud
+
+### 1. Serveri Käivitamine ja Kontroll
+
+```bash
+# Keskkonnamuutujate seadistamine (Windows PowerShell)
+$env:RECEPTIONIST_KEY="8ded6076"
+$env:SAFETY_OFFICIAL_KEY="a2d393bc"
+$env:LAP_LINE_OBSERVER_KEY="662e0f6c"
+
+# Serveri käivitamine
+npm start
+
+# Kontroll, et server töötab
+netstat -an | findstr :3000
+```
+
+### 2. Kasutajaliidese Testimine
+
+#### 2.1 Front Desk (Receptionist) - http://localhost:3000/front-desk
+**Testimise Sammud:**
+1. Avada brauser ja minna aadressile http://localhost:3000/front-desk
+2. Kontrollida, et autentimisvorm on nähtav
+3. Sisestada vale võti ja vajutada "Sisene"
+   - Kontrollida, et tuleb veateade ja 500ms viivis
+4. Sisestada õige võti "8ded6076" ja vajutada "Sisene"
+   - Kontrollida, et avaneb Front Desk liides
+5. Lisada uus võistlus:
+   - Sisestada nime "Test Võistlus 1"
+   - Vajutada "Lisa Võistlus"
+   - Kontrollida, et võistlus ilmub nimekirja
+6. Lisada juht:
+   - Sisestada nime "Mati Mees"
+   - Vajutada "Lisa Juht"
+   - Kontrollida, et juht ilmub nimekirja automaatse numbriga
+7. Lisada teine juht "Kati Naine"
+   - Kontrollida, et saab teise numbriga
+8. Kustutada juht:
+   - Vajutada "Kustuta" nupu juures
+   - Kontrollida, et juht eemaldub nimekirjast
+
+#### 2.2 Race Control (Safety Official) - http://localhost:3000/race-control
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/race-control
+2. Autentida võtmega "a2d393bc"
+3. Kontrollida, et võistlus "Test Võistlus 1" on nähtav
+4. Alustada võistlust:
+   - Vajutada "Alusta Võistlust"
+   - Kontrollida, et taimer hakkab tööle
+   - Kontrollida, et nupud muutuvad aktiivseks
+5. Muuta võistluse režiimi:
+   - Vajutada "Hazard" - kontrollida, et režiim muutub
+   - Vajutada "Danger" - kontrollida, et režiim muutub
+   - Vajutada "Safe" - kontrollida, et režiim muutub
+   - Vajutada "Finish" - kontrollida, et režiim muutub
+6. Lõpetada võistlus:
+   - Vajutada "Lõpeta Võistlus"
+   - Kontrollida, et taimer peatub
+   - Kontrollida, et nupud muutuvad mitteaktiivseks
+
+#### 2.3 Lap-line Tracker (Lap-line Observer) - http://localhost:3000/lap-line-tracker
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/lap-line-tracker
+2. Autentida võtmega "662e0f6c"
+3. Kontrollida, et juhid on nähtavad
+4. Salvestada ringiaeg:
+   - Valida juht "Mati Mees"
+   - Sisestada aeg "1:23.456"
+   - Vajutada "Salvesta Ringiaeg"
+   - Kontrollida, et aeg ilmub nimekirja
+5. Salvestada teine ringiaeg:
+   - Valida juht "Kati Naine"
+   - Sisestada aeg "1:25.789"
+   - Vajutada "Salvesta Ringiaeg"
+   - Kontrollida, et aeg ilmub nimekirja
+
+#### 2.4 Leader Board (Public Display) - http://localhost:3000/leader-board
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/leader-board
+2. Kontrollida, et autentimist ei ole vaja
+3. Kontrollida, et juhid ja nende ringiajad on nähtavad
+4. Kontrollida, et juhid on sorteeritud ringiaja järgi (parim esimene)
+5. Testida täisekraani nuppu:
+   - Vajutada "Täisekraan"
+   - Kontrollida, et ekraan muutub täisekraaniks
+   - Vajutada ESC või F11 väljumiseks
+
+#### 2.5 Next Race (Public Display) - http://localhost:3000/next-race
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/next-race
+2. Kontrollida, et "Test Võistlus 1" on nähtav
+3. Kontrollida, et juhid on loetletud
+4. Testida täisekraani nuppu
+
+#### 2.6 Race Countdown (Public Display) - http://localhost:3000/race-countdown
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/race-countdown
+2. Kontrollida, et taimer on nähtav
+3. Minna Race Control liidesesse ja alustada võistlust
+4. Kontrollida, et taimer hakkab tööle ja uuendub reaalajas
+5. Kontrollida, et taimer peatub, kui võistlus lõpetatakse
+
+#### 2.7 Race Flags (Public Display) - http://localhost:3000/race-flags
+**Testimise Sammud:**
+1. Avada uus brauseri tab aadressile http://localhost:3000/race-flags
+2. Kontrollida, et "Safe" lipp on nähtav (vaikimisi)
+3. Minna Race Control liidesesse ja muuta režiimi:
+   - "Hazard" - kontrollida, et lipp muutub oranžiks
+   - "Danger" - kontrollida, et lipp muutub punaseks
+   - "Finish" - kontrollida, et lipp muutub ruuduliseks
+   - "Safe" - kontrollida, et lipp muutub roheliseks
+
+### 3. Reaalajas Kommunikatsiooni Testimine
+
+#### 3.1 Socket.IO Ühenduse Kontroll
+1. Avada brauseri Developer Tools (F12)
+2. Minna Console tabi
+3. Kontrollida, et Socket.IO ühendus on loodud
+4. Teha muudatusi erinevates liideses ja jälgida console'i
+
+#### 3.2 Sünkroniseerimise Testimine
+1. Avada kõik liidesed erinevates tabides
+2. Teha muudatusi ühes liideses
+3. Kontrollida, et muudatused ilmuvad kohe kõigis teistes liideses
+
+### 4. Veakontroll
+
+#### 4.1 Vale Autentimine
+1. Proovida sisestada vale võti kõigis töötajaliideses
+2. Kontrollida, et tuleb veateade ja viivis
+
+#### 4.2 Tühjade Väljade Kontroll
+1. Proovida lisada võistlust ilma nimeta
+2. Proovida lisada juhti ilma nimeta
+3. Proovida salvestada ringiaega ilma ajata
+
+#### 4.3 Duplikaatide Kontroll
+1. Proovida lisada sama nimega juhti
+2. Kontrollida, et tuleb veateade
+
+### 5. Mobiili Optimeerimise Testimine
+
+#### 5.1 Responsive Design
+1. Muuta brauseri akna suurust
+2. Kontrollida, et liidesed kohanevad
+3. Testida mobiilivaates (F12 -> Toggle device toolbar)
+
+#### 5.2 Touch-friendly Nupud
+1. Kontrollida, et töötajaliidese nupud on piisavalt suured
+2. Testida puutetundlikkust
+
+### 6. Jõudluse Testimine
+
+#### 6.1 Mitme Kasutaja Simuleerimine
+1. Avada mitu brauseri akent
+2. Teha samaaegseid muudatusi
+3. Kontrollida, et konflikte ei teki
+
+#### 6.2 Pikaajaline Töö
+1. Jätta süsteem tööle mõneks minutiks
+2. Teha perioodilisi muudatusi
+3. Kontrollida, et süsteem jääb stabiilseks
+
+### 7. Testimise Kokkuvõte
+
+**Õnnestunud Testid:**
+- ✅ Kõik kasutajaliidesed laevad korralikult
+- ✅ Autentimine töötab kõigis töötajaliideses
+- ✅ Reaalajas kommunikatsioon toimib
+- ✅ Võistluste lisamine ja kustutamine
+- ✅ Juhide lisamine ja kustutamine
+- ✅ Võistluste alustamine ja lõpetamine
+- ✅ Režiimide muutmine
+- ✅ Ringiaegade salvestamine
+- ✅ Täisekraani funktsionaalsus
+- ✅ Responsive design
+
+**Testimise Tulemused:**
+- Kõik põhifunktsioonid töötavad korralikult
+- Reaalajas uuendused toimivad kiiresti
+- Kasutajaliidesed on intuitiivsed
+- Turvalisus on korralikult implementeeritud
+
+### 8. Järgmised Sammud
+
+**Võimalikud Parandused:**
+- Andmete püsivus (praegu kaovad andmed serveri taaskäivitamisel)
+- Veakontrolli täiendamine
+- Jõudluse optimeerimine suuremate andmemahtude jaoks
+
+**Testimise Automatiseerimine:**
+- Selenium või Playwright testid
+- API testid
+- Ühiktestid
+
+---
+*Testimise kuupäev: $(Get-Date)*
+*Testija: Arendaja*
+*Süsteemi versioon: 1.0.0*

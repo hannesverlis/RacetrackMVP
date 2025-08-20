@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Countdown - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Võidusõidu ajastaja</h1>
+            <p>Võidusõidu aja jälgimine</p>
+        </div>
+
+        <!-- Täisekraani nupp -->
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+        <!-- Suur ajastaja -->
+        <div class="timer" id="raceTimer" style="font-size: 8rem; margin: 100px 0;">
+            --:--
+        </div>
+
+        <!-- Võidusõidu info -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🏁 Võidusõidu info</h3>
+            </div>
+            <div id="raceInfo" style="text-align: center; font-size: 2rem;">
+                Ootab võidusõitu...
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/race-countdown.js"></script>
+</body>
+</html>

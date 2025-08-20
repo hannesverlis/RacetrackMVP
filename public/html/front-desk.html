@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Front Desk - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏁 Front Desk</h1>
+            <p>Võidusõitude haldamine ja sõitjate registreerimine</p>
+        </div>
+
+        <!-- Autentimise vorm -->
+        <div id="authForm" class="auth-form">
+            <h2>🔐 Ligipääs</h2>
+            <div class="form-group">
+                <label for="accessKey">Ligipääsukood:</label>
+                <input type="password" id="accessKey" class="form-control" placeholder="Sisesta ligipääsukood">
+            </div>
+            <button onclick="authenticate()" class="btn btn-secondary">Sisene</button>
+            <div id="authError" class="error" style="display: none;"></div>
+        </div>
+
+        <!-- Põhiline kasutajaliides -->
+        <div id="mainInterface" style="display: none;">
+            <div class="grid grid-2">
+                <!-- Uue võidusõidu lisamine -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">➕ Lisa uus võidusõit</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="raceName">Võidusõidu nimi:</label>
+                        <input type="text" id="raceName" class="form-control" placeholder="Näiteks: Hommikune võidusõit">
+                    </div>
+                    <button onclick="addRaceSession()" class="btn btn-success">Lisa võidusõit</button>
+                </div>
+
+                <!-- Sõitja lisamine -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">👤 Lisa sõitja</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectedRace">Vali võidusõit:</label>
+                        <select id="selectedRace" class="form-control">
+                            <option value="">Vali võidusõit...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="driverName">Sõitja nimi:</label>
+                        <input type="text" id="driverName" class="form-control" placeholder="Sõitja täisnimi">
+                    </div>
+                    <button onclick="addDriver()" class="btn btn-secondary">Lisa sõitja</button>
+                </div>
+            </div>
+
+            <!-- Võidusõitude nimekiri -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📋 Võidusõidud</h3>
+                </div>
+                <div id="raceSessionsList">
+                    <p>Võidusõite pole veel lisatud.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/front-desk.js"></script>
+</body>
+</html>

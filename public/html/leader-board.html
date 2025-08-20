@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leader Board - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Leader Board</h1>
+            <p>Võidusõidu tulemused ja ringide ajad</p>
+        </div>
+
+        <!-- Täisekraani nupp -->
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+        <!-- Ajastaja -->
+        <div class="timer" id="raceTimer">--:--</div>
+
+        <!-- Võidusõidu režiim -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🚩 Võidusõidu režiim</h3>
+            </div>
+            <div id="raceMode" style="text-align: center; font-size: 2rem; font-weight: bold;">
+                Ootab võidusõitu...
+            </div>
+        </div>
+
+        <!-- Võidusõidu tulemused -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📊 Võidusõidu tulemused</h3>
+            </div>
+            <div id="leaderboard">
+                <p>Võidusõitu pole veel alustatud.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/leader-board.js"></script>
+</body>
+</html>

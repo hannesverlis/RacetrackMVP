@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lap-line Tracker - Beachside Racetrack</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏱️ Lap-line Tracker</h1>
+            <p>Ringide registreerimine ja ajastamine</p>
+        </div>
+
+        <!-- Autentimise vorm -->
+        <div id="authForm" class="auth-form">
+            <h2>🔐 Ligipääs</h2>
+            <div class="form-group">
+                <label for="accessKey">Ligipääsukood:</label>
+                <input type="password" id="accessKey" class="form-control" placeholder="Sisesta ligipääsukood">
+            </div>
+            <button onclick="authenticate()" class="btn btn-secondary">Sisene</button>
+            <div id="authError" class="error" style="display: none;"></div>
+        </div>
+
+        <!-- Põhiline kasutajaliides -->
+        <div id="mainInterface" style="display: none;">
+            <!-- Võidusõidu info -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🏁 Praegune võidusõit</h3>
+                </div>
+                <div id="raceInfo">
+                    <p>Võidusõitu pole alustatud.</p>
+                </div>
+            </div>
+
+            <!-- Ringi nupud -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🚗 Ringi registreerimine</h3>
+                </div>
+                <div id="lapButtons" class="lap-buttons">
+                    <p>Ringi nupud ilmuvad võidusõidu alustamisel.</p>
+                </div>
+            </div>
+
+            <!-- Ringide statistika -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Ringide statistika</h3>
+                </div>
+                <div id="lapStats">
+                    <p>Statistikat pole veel saadaval.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/lap-line-tracker.js"></script>
+</body>
+</html>
